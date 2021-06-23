@@ -24,9 +24,9 @@ func (sr *StreamReader) Read() rune {
 func (sr *StreamReader) Peek() rune {
 	peekPos := sr.curPosition + 1
 	if peekPos >= len(sr.Stream) {
-		return 0
+		return rune('0')
 	}
-	return sr.Stream[rune(sr.curPosition)]
+	return sr.Stream[rune(peekPos)]
 }
 
 func (sr *StreamReader) EndOfStream() bool {

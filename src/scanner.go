@@ -7,8 +7,6 @@ import (
 	"os"
 )
 
-type TokenCode byte
-
 var keywords map[string]TokenCode
 
 type TokenRecord struct {
@@ -30,6 +28,8 @@ const (
 	MAX_EXPONENT = 308
 )
 
+type TokenCode byte
+
 const (
 	T_EOF TokenCode = iota
 	T_STRING
@@ -46,8 +46,7 @@ const (
 	T_GREATER_EQ
 	T_EQUAL
 	T_ASSIGN
-	T_BANG
-	T_BANG_EQ
+	T_NOT_EQ
 	T_COLON
 	T_SEMICOLON
 	T_COMMA
@@ -76,6 +75,7 @@ const (
 	T_AND
 	T_OR
 	T_NOT
+	T_XOR
 	T_DIV
 	T_FUNCTION
 	T_REF
@@ -123,6 +123,7 @@ func (s *Scanner) addKeywords() {
 	keywords["and"] = T_AND
 	keywords["or"] = T_OR
 	keywords["not"] = T_NOT
+	keywords["xor"] = T_XOR
 	keywords["div"] = T_DIV
 	keywords["function"] = T_FUNCTION
 	keywords["ref"] = T_REF
@@ -208,7 +209,7 @@ func (s *Scanner) NextToken() {
 		s.getWord()
 		return
 	}
-	if isDigit(s.ch) {
+	if isDigit(s.ch) || s.ch == rune('.') {
 		s.getNumber()
 		return
 	}
@@ -461,6 +462,9 @@ func (s *Scanner) getSpecial() {
 		if s.StreamReader.Peek() == rune('=') {
 			s.ch = s.nextChar()
 			s.TokenRecord.Token = T_LESS_EQ
+		} else if s.StreamReader.Peek() == rune('>') {
+			s.ch = s.nextChar()
+			s.TokenRecord.Token = T_NOT_EQ
 		} else {
 			s.TokenRecord.Token = T_LESS
 		}
@@ -470,13 +474,6 @@ func (s *Scanner) getSpecial() {
 			s.TokenRecord.Token = T_GREATER_EQ
 		} else {
 			s.TokenRecord.Token = T_GREATER
-		}
-	case rune('!'):
-		if s.StreamReader.Peek() == rune('=') {
-			s.ch = s.nextChar()
-			s.TokenRecord.Token = T_BANG_EQ
-		} else {
-			s.TokenRecord.Token = T_BANG
 		}
 	case rune('='):
 		if s.StreamReader.Peek() == rune('=') {
@@ -529,6 +526,8 @@ func (s *Scanner) TokenToString(tokenCode TokenCode) string {
 		return fmt.Sprintf("special <'%s'>", "=")
 	case T_EQUAL:
 		return fmt.Sprintf("special <'%s'>", "==")
+	case T_NOT_EQ:
+		return fmt.Sprintf("special <'%s'>", "<>")
 	case T_LESS:
 		return fmt.Sprintf("special <'%s'>", "<")
 	case T_LESS_EQ:
@@ -576,6 +575,8 @@ func (s *Scanner) TokenToString(tokenCode TokenCode) string {
 	case T_OR:
 		return fmt.Sprintf("key word: <'%s'>", s.TokenRecord.TokenString)
 	case T_NOT:
+		return fmt.Sprintf("key word: <'%s'>", s.TokenRecord.TokenString)
+	case T_XOR:
 		return fmt.Sprintf("key word: <'%s'>", s.TokenRecord.TokenString)
 	case T_DIV:
 		return fmt.Sprintf("key word: <'%s'>", s.TokenRecord.TokenString)

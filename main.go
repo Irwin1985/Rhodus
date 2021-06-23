@@ -2,13 +2,16 @@ package main
 
 import (
 	"Rhodus/src"
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"os"
 )
 
 func main() {
-	testScannerWithFileName()
+	src.Repl()
+	//testScannerWithRepl()
+	//testScannerWithFileName()
 }
 
 func testScannerWithFileName() {
@@ -38,4 +41,24 @@ func testScannerWithFileName() {
 		sc.NextToken()
 	}
 	fmt.Println("\n Success!")
+}
+
+func testScannerWithRepl() {
+	scanner := bufio.NewScanner(os.Stdin)
+	fmt.Print("Rhodus Scanner Test\nPlease type any valid command and hit enter.\n")
+	for {
+		fmt.Print(">> ")
+		scanned := scanner.Scan()
+		if !scanned {
+			return
+		}
+		input := scanner.Text()
+		sc := src.NewScanner()
+		sc.ScanString(input)
+		sc.NextToken()
+		for sc.Token() != src.T_EOF {
+			fmt.Println(sc.TokenToString(sc.Token()))
+			sc.NextToken()
+		}
+	}
 }
