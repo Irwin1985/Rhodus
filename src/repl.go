@@ -13,8 +13,9 @@ const (
 
 func Repl() {
 	var sourceCode string
+	var sy *SyntaxAnalisisCalc
 	sc := NewScanner()
-	var sy *SyntaxAnalisis
+	sy = NewSyntaxAnalisisCalc(sc)
 	scanner := bufio.NewScanner(os.Stdin)
 	displayWelcome()
 	for {
@@ -29,8 +30,7 @@ func Repl() {
 			break
 		}
 		sc.ScanString(sourceCode)
-		sy = NewSyntaxAnalisis(sc)
-		sy.Program()
+		sy.Statement()
 	}
 }
 

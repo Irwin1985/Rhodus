@@ -10,6 +10,7 @@ import (
 
 func main() {
 	src.Repl()
+	//testCalculator()
 	//testScannerWithRepl()
 	//testScannerWithFileName()
 }
@@ -61,4 +62,12 @@ func testScannerWithRepl() {
 			sc.NextToken()
 		}
 	}
+}
+
+func testCalculator() {
+	input := `a`
+	sc := src.NewScanner()
+	sc.ScanString(input)
+	sy := src.NewSyntaxAnalisisCalc(sc)
+	sy.Statement()
 }

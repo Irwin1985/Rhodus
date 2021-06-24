@@ -9,7 +9,7 @@ import (
 
 var keywords map[string]TokenCode
 
-type TokenRecord struct {
+type TTokenRecord struct {
 	Token        TokenCode
 	TokenString  string
 	TokenInteger int32
@@ -89,7 +89,8 @@ type Scanner struct {
 	lineNumber   int
 	ch           rune
 
-	TokenRecord  TokenRecord
+	TokenRecord  TTokenRecord
+	tokenQueue   []TTokenRecord
 	StreamReader *StreamReader
 
 	inMultiLineComment bool
@@ -97,7 +98,8 @@ type Scanner struct {
 
 func NewScanner() *Scanner {
 	s := &Scanner{
-		TokenRecord: TokenRecord{},
+		TokenRecord: TTokenRecord{},
+		tokenQueue:  []TTokenRecord{},
 	}
 	s.Token = s.getTokenCode
 	s.addKeywords()
@@ -198,7 +200,20 @@ func (s *Scanner) nextChar() rune {
 	return result
 }
 
+func (s *Scanner) PushBackToken(token TTokenRecord) {
+	s.tokenQueue = append(s.tokenQueue, token)
+}
+
 func (s *Scanner) NextToken() {
+	if len(s.tokenQueue) > 0 {
+		s.TokenRecord = s.tokenQueue[0]
+		if len(s.tokenQueue) >= 1 {
+			s.tokenQueue = s.tokenQueue[1:] // discount first element
+		} else {
+			s.tokenQueue = []TTokenRecord{} //empty queue
+		}
+		return
+	}
 	s.skipBlanksAndComments()
 
 	// registrar la posición del token que estamos a punto de identificar
