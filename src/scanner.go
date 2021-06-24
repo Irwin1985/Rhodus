@@ -77,8 +77,10 @@ const (
 	T_NOT
 	T_XOR
 	T_DIV
+	T_MOD
 	T_FUNCTION
 	T_REF
+	T_RETURN
 	T_PRINT
 	T_PRINTLN
 )
@@ -127,8 +129,10 @@ func (s *Scanner) addKeywords() {
 	keywords["not"] = T_NOT
 	keywords["xor"] = T_XOR
 	keywords["div"] = T_DIV
+	keywords["mod"] = T_MOD
 	keywords["function"] = T_FUNCTION
 	keywords["ref"] = T_REF
+	keywords["return"] = T_RETURN
 	keywords["print"] = T_PRINT
 	keywords["println"] = T_PRINTLN
 }
@@ -228,8 +232,8 @@ func (s *Scanner) NextToken() {
 		s.getNumber()
 		return
 	}
-	if s.ch == rune('"') {
-		s.getString()
+	if s.ch == rune('"') || s.ch == rune('\'') {
+		s.getString(s.ch)
 		return
 	}
 	if s.ch == EOF_CHAR {
@@ -408,7 +412,7 @@ func (s *Scanner) getNumber() {
 	}
 }
 
-func (s *Scanner) getString() {
+func (s *Scanner) getString(strEnd rune) {
 	s.TokenRecord.TokenString = ""
 	s.TokenRecord.Token = T_STRING
 
@@ -430,7 +434,7 @@ func (s *Scanner) getString() {
 			}
 			s.ch = s.nextChar()
 		} else {
-			if s.ch == rune('"') {
+			if s.ch == strEnd {
 				s.ch = s.nextChar() // skip the closing '"'
 				return
 			} else {
@@ -477,9 +481,6 @@ func (s *Scanner) getSpecial() {
 		if s.StreamReader.Peek() == rune('=') {
 			s.ch = s.nextChar()
 			s.TokenRecord.Token = T_LESS_EQ
-		} else if s.StreamReader.Peek() == rune('>') {
-			s.ch = s.nextChar()
-			s.TokenRecord.Token = T_NOT_EQ
 		} else {
 			s.TokenRecord.Token = T_LESS
 		}
@@ -489,6 +490,14 @@ func (s *Scanner) getSpecial() {
 			s.TokenRecord.Token = T_GREATER_EQ
 		} else {
 			s.TokenRecord.Token = T_GREATER
+		}
+	case rune('!'):
+		if s.StreamReader.Peek() == rune('=') {
+			s.ch = s.nextChar()
+			s.TokenRecord.Token = T_NOT_EQ
+		} else {
+			fmt.Printf("unexpecting '=' character after explanation point:%v\n", s.ch)
+			os.Exit(1)
 		}
 	case rune('='):
 		if s.StreamReader.Peek() == rune('=') {

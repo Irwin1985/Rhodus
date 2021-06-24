@@ -78,7 +78,7 @@ func (sy *SyntaxAnalisisCalc) assignment(variableName string) {
 	sy.symbolTable[variableName] = value
 }
 
-// term ::= factor { ('+' | '-') factor }
+// term ::= power { ('*' | '/') power }
 func (sy *SyntaxAnalisisCalc) term() float64 {
 	result := sy.power()
 	for sy.sc.Token() == T_MULT || sy.sc.Token() == T_DIVIDE {

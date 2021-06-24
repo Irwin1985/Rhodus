@@ -9,10 +9,13 @@ import (
 )
 
 func main() {
-	src.Repl()
+	repl := src.NewRepl()
+	repl.Start("_debug")
+	//src.Repl()
 	//testCalculator()
 	//testScannerWithRepl()
 	//testScannerWithFileName()
+	//fmt.Println(src.GetSampleScriptsDir())
 }
 
 func testScannerWithFileName() {
@@ -35,12 +38,14 @@ func testScannerWithFileName() {
 
 	sc := src.NewScanner()
 	sc.ScanString(string(fileContents))
+	sy := src.NewSyntaxAnalisis(sc)
+	sy.Program()
 
-	sc.NextToken()
-	for sc.Token() != src.T_EOF {
-		fmt.Println(sc.TokenToString(sc.Token()))
-		sc.NextToken()
-	}
+	// sc.NextToken()
+	// for sc.Token() != src.T_EOF {
+	// 	fmt.Println(sc.TokenToString(sc.Token()))
+	// 	sc.NextToken()
+	// }
 	fmt.Println("\n Success!")
 }
 
