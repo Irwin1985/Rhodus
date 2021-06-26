@@ -33,7 +33,16 @@ func (sy *SyntaxAnalisis) statementList() {
 func (sy *SyntaxAnalisis) statement() {
 	switch sy.sc.Token() {
 	case T_IDENT:
-		sy.assignment()
+		token1 := sy.sc.TokenRecord
+		sy.sc.NextToken()
+		token2 := sy.sc.TokenRecord
+		if token2.Token == T_ASSIGN {
+			sy.assignment()
+		} else if token2.Token == T_LPAREN {
+			sy.sc.PushBackToken(token1)
+			sy.sc.PushBackToken(token2)
+			sy.factor()
+		}
 	case T_IF:
 		sy.ifStatement()
 	case T_FOR:
@@ -48,7 +57,7 @@ func (sy *SyntaxAnalisis) statement() {
 		sy.breakStatement()
 	case T_FUNCTION:
 		sy.functionDef()
-	case T_PRINTLN:
+	case T_PRINT, T_PRINTLN:
 		sy.printlnStatement()
 	default:
 		fmt.Println("expecting assignment, if, for, while or repeat statement")
@@ -176,7 +185,7 @@ func (sy *SyntaxAnalisis) factor() {
 	case T_FLOAT:
 		sy.sc.NextToken()
 	case T_IDENT:
-		sy.sc.NextToken()
+		sy.expect(T_IDENT)
 		if sy.sc.Token() == T_LBRACKET { // index assignment or expression
 			sy.sc.NextToken() // skip the T_LBRACKET
 			if sy.sc.Token() != T_RBRACKET {
@@ -184,7 +193,7 @@ func (sy *SyntaxAnalisis) factor() {
 			}
 			sy.expect(T_RBRACKET)
 		} else if sy.sc.Token() == T_LPAREN { // function call
-			sy.sc.NextToken() // skip T_LPAREN
+			sy.expect(T_LPAREN)
 			if sy.sc.Token() != T_RPAREN {
 				sy.expressionList()
 			}
@@ -296,7 +305,7 @@ func (sy *SyntaxAnalisis) returnStatement() {
 
 // printlnStatement ::= 'println' '(' expression ')'
 func (sy *SyntaxAnalisis) printlnStatement() {
-	sy.sc.NextToken() // skip T_PRINTLN
+	sy.sc.NextToken() // skip T_PRINT, T_PRINTLN
 	sy.expect(T_LPAREN)
 	sy.expression()
 	sy.expect(T_RPAREN)

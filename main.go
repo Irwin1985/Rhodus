@@ -4,18 +4,46 @@ import (
 	"Rhodus/src"
 	"bufio"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 func main() {
-	repl := src.NewRepl()
-	repl.Start("_debug")
+	fileName := `c:\a1\test.txt`
+	if _, err := os.Stat(fileName); os.IsNotExist(err) {
+		fmt.Println("File not found")
+		os.Exit(1)
+	}
+	fileContent, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		panic(err)
+	}
+	printContent(string(fileContent))
+
+	//repl := src.NewRepl()
+	//repl.Start("debug")
 	//src.Repl()
 	//testCalculator()
 	//testScannerWithRepl()
 	//testScannerWithFileName()
 	//fmt.Println(src.GetSampleScriptsDir())
+}
+
+func printContent(content string) {
+	r := bufio.NewReader(strings.NewReader(content))
+	for {
+		if chr, _, err := r.ReadRune(); err != nil {
+			if err == io.EOF {
+				break
+			} else {
+				panic(err)
+			}
+		} else {
+			fmt.Printf("%q\n", chr)
+		}
+	}
 }
 
 func testScannerWithFileName() {

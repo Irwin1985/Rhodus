@@ -138,6 +138,9 @@ func (s *Scanner) addKeywords() {
 }
 
 func (s *Scanner) getTokenCode() TokenCode {
+	if len(s.tokenQueue) > 0 {
+		return s.tokenQueue[0].Token
+	}
 	return s.TokenRecord.Token
 }
 
@@ -205,16 +208,15 @@ func (s *Scanner) nextChar() rune {
 }
 
 func (s *Scanner) PushBackToken(token TTokenRecord) {
+	s.TokenRecord = token
 	s.tokenQueue = append(s.tokenQueue, token)
 }
 
 func (s *Scanner) NextToken() {
 	if len(s.tokenQueue) > 0 {
 		s.TokenRecord = s.tokenQueue[0]
-		if len(s.tokenQueue) >= 1 {
+		if len(s.tokenQueue) > 0 {
 			s.tokenQueue = s.tokenQueue[1:] // discount first element
-		} else {
-			s.tokenQueue = []TTokenRecord{} //empty queue
 		}
 		return
 	}
